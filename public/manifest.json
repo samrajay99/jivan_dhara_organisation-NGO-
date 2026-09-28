@@ -1,0 +1,16 @@
+{
+  "name": "Jivan Dhara Organisation",
+  "short_name": "JDO NGO",
+  "description": "Grassroots Sewa Trust in Kolkata, West Bengal established in 2008. Dedicated to Education, PMGDISHA, Healthcare, and Social Welfare.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#064e3b",
+  "theme_color": "#064e3b",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

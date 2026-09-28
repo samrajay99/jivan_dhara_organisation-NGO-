@@ -1,0 +1,286 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  CONTENT_MANAGER
+  MEMBERSHIP_MANAGER
+  FINANCE_MANAGER
+  MEMBER
+}
+
+enum MemberStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CORRECTION_REQUIRED
+  SUSPENDED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUBMITTED
+  VERIFIED
+  FAILED
+  REFUNDED
+}
+
+enum NoticePriority {
+  NORMAL
+  IMPORTANT
+  URGENT
+}
+
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  passwordHash String
+  role         String         @default("MEMBER")
+  phone        String?
+  avatar       String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  member       Member?
+  notifications Notification[]
+  auditLogs    AuditLog[]
+}
+
+model Member {
+  id                 String              @id @default(cuid())
+  userId             String?             @unique
+  user               User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  membershipId       String?             @unique
+  fullName           String
+  parentName         String
+  dob                String
+  gender             String
+  bloodGroup         String?
+  mobile             String
+  whatsapp           String?
+  email              String
+  idType             String
+  idNumber           String
+  address            String
+  villageTown        String
+  postOffice         String
+  policeStation      String
+  district           String
+  state              String
+  pinCode            String
+  membershipType     String              @default("General Member")
+  branch             String              @default("Kolkata Central")
+  occupation         String?
+  education          String?
+  volunteerInterests String?
+  emergencyContact   String?
+  source             String?
+  photoUrl           String?
+  status             String              @default("PENDING")
+  rejectionReason    String?
+  joiningDate        DateTime?
+  validityDate       DateTime?
+  idCardQr           String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  payments           MembershipPayment[]
+}
+
+model MembershipPayment {
+  id            String    @id @default(cuid())
+  memberId      String
+  member        Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  amount        Float     @default(50)
+  paymentMethod String    @default("UPI")
+  upiRef        String?
+  transactionId String?
+  screenshotUrl String?
+  status        String    @default("PENDING")
+  verifiedAt    DateTime?
+  verifiedBy    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Donation {
+  id            String    @id @default(cuid())
+  donorName     String
+  email         String?
+  mobile        String?
+  amount        Float
+  panNumber     String?
+  purpose       String    @default("General Welfare & Social Activities")
+  paymentMethod String    @default("UPI")
+  upiRef        String?
+  screenshotUrl String?
+  isAnonymous   Boolean   @default(false)
+  status        String    @default("PENDING")
+  receiptNumber String?   @unique
+  verifiedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model DailyStatus {
+  id                 String   @id @default(cuid())
+  date               String
+  title              String
+  description        String
+  location           String
+  category           String
+  volunteersCount    Int      @default(0)
+  beneficiariesCount Int      @default(0)
+  photos             String? // JSON array or comma-separated URLs
+  videoUrl           String?
+  isPublished        Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Notice {
+  id            String   @id @default(cuid())
+  title         String
+  description   String
+  date          String
+  priority      String   @default("NORMAL")
+  attachmentUrl String?
+  isPublished   Boolean  @default(true)
+  expiryDate    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Event {
+  id            String              @id @default(cuid())
+  title         String
+  slug          String              @unique
+  coverImage    String?
+  date          String
+  startTime     String
+  endTime       String
+  location      String
+  mapUrl        String?
+  description   String
+  organizer     String              @default("Jivan Dhara Organisation")
+  status        String              @default("UPCOMING")
+  maxAttendees  Int                 @default(100)
+  isPublished   Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  registrations EventRegistration[]
+}
+
+model EventRegistration {
+  id                 String   @id @default(cuid())
+  eventId            String
+  event              Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registrationNumber String   @unique
+  name               String
+  mobile             String
+  email              String
+  attendeesCount     Int      @default(1)
+  remarks            String?
+  status             String   @default("REGISTERED")
+  createdAt          DateTime @default(now())
+}
+
+model GalleryItem {
+  id           String   @id @default(cuid())
+  title        String
+  category     String   @default("EVENTS")
+  type         String   @default("PHOTO")
+  url          String
+  thumbnailUrl String?
+  caption      String?
+  isFeatured   Boolean  @default(false)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  name        String
+  roleOrTitle String?  @default("Supporter")
+  rating      Int      @default(5)
+  content     String
+  photoUrl    String?
+  isMember    Boolean  @default(false)
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+}
+
+model ContactMessage {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  mobile      String?
+  subject     String
+  message     String
+  isRead      Boolean  @default(false)
+  replyStatus String   @default("UNREPLIED")
+  createdAt   DateTime @default(now())
+}
+
+model VolunteerApplication {
+  id              String   @id @default(cuid())
+  name            String
+  phone           String
+  email           String
+  location        String
+  skills          String
+  availability    String
+  areasOfInterest String
+  message         String?
+  status          String   @default("PENDING")
+  createdAt       DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("GENERAL")
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
