@@ -12,10 +12,15 @@ export const metadata: Metadata = {
 export const revalidate = 0;
 
 export default async function ReviewsPage() {
-  const reviews = await prisma.review.findMany({
-    where: { status: "APPROVED" },
-    orderBy: { createdAt: "desc" },
-  });
+  let reviews: any[] = [];
+  try {
+    reviews = await prisma.review.findMany({
+      where: { status: "APPROVED" },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch {
+    reviews = [];
+  }
 
   return (
     <div className="bg-slate-50 min-h-screen">

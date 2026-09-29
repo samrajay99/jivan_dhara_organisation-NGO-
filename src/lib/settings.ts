@@ -59,8 +59,7 @@ export async function getSiteSettings(): Promise<SiteSettingsMap> {
       map[s.key] = s.value;
     }
     return map as SiteSettingsMap;
-  } catch (e) {
-    console.error("Error loading site settings:", e);
+  } catch {
     return defaultSettings;
   }
 }

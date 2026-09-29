@@ -12,9 +12,14 @@ export const metadata: Metadata = {
 export const revalidate = 0;
 
 export default async function GalleryPage() {
-  const items = await prisma.galleryItem.findMany({
-    orderBy: { order: "asc" },
-  });
+  let items: any[] = [];
+  try {
+    items = await prisma.galleryItem.findMany({
+      orderBy: { order: "asc" },
+    });
+  } catch {
+    items = [];
+  }
 
   return (
     <div className="bg-slate-50 min-h-screen">

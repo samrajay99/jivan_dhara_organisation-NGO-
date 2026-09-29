@@ -22,10 +22,15 @@ export const metadata: Metadata = {
 export const revalidate = 0;
 
 export default async function NoticesPage() {
-  const notices = await prisma.notice.findMany({
-    where: { isPublished: true },
-    orderBy: { createdAt: "desc" },
-  });
+  let notices: any[] = [];
+  try {
+    notices = await prisma.notice.findMany({
+      where: { isPublished: true },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch {
+    notices = [];
+  }
 
   return (
     <div className="bg-slate-50 min-h-screen">

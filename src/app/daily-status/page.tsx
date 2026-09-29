@@ -22,10 +22,15 @@ export const metadata: Metadata = {
 export const revalidate = 0;
 
 export default async function DailyStatusPage() {
-  const dailyStatuses = await prisma.dailyStatus.findMany({
-    where: { isPublished: true },
-    orderBy: { createdAt: "desc" },
-  });
+  let dailyStatuses: any[] = [];
+  try {
+    dailyStatuses = await prisma.dailyStatus.findMany({
+      where: { isPublished: true },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch {
+    dailyStatuses = [];
+  }
 
   return (
     <div className="bg-slate-50 min-h-screen">

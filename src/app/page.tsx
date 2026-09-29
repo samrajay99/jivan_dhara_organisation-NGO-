@@ -32,34 +32,49 @@ export const revalidate = 0; // Fresh dynamic content
 export default async function HomePage() {
   const settings = await getSiteSettings();
 
-  // Fetch real dynamic data from database
-  const [dailyStatuses, notices, upcomingEvents, galleryItems, reviews] = await Promise.all([
-    prisma.dailyStatus.findMany({
-      where: { isPublished: true },
-      orderBy: { createdAt: "desc" },
-      take: 3,
-    }),
-    prisma.notice.findMany({
-      where: { isPublished: true },
-      orderBy: { createdAt: "desc" },
-      take: 4,
-    }),
-    prisma.event.findMany({
-      where: { isPublished: true },
-      orderBy: { date: "asc" },
-      take: 3,
-    }),
-    prisma.galleryItem.findMany({
-      where: { isFeatured: true },
-      orderBy: { order: "asc" },
-      take: 6,
-    }),
-    prisma.review.findMany({
-      where: { status: "APPROVED" },
-      orderBy: { createdAt: "desc" },
-      take: 3,
-    }),
-  ]);
+  // Fetch real dynamic data from database safely
+  let dailyStatuses: any[] = [];
+  let notices: any[] = [];
+  let upcomingEvents: any[] = [];
+  let galleryItems: any[] = [];
+  let reviews: any[] = [];
+
+  try {
+    const results = await Promise.all([
+      prisma.dailyStatus.findMany({
+        where: { isPublished: true },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+      }),
+      prisma.notice.findMany({
+        where: { isPublished: true },
+        orderBy: { createdAt: "desc" },
+        take: 4,
+      }),
+      prisma.event.findMany({
+        where: { isPublished: true },
+        orderBy: { date: "asc" },
+        take: 3,
+      }),
+      prisma.galleryItem.findMany({
+        where: { isFeatured: true },
+        orderBy: { order: "asc" },
+        take: 6,
+      }),
+      prisma.review.findMany({
+        where: { status: "APPROVED" },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+      }),
+    ]);
+    dailyStatuses = results[0] || [];
+    notices = results[1] || [];
+    upcomingEvents = results[2] || [];
+    galleryItems = results[3] || [];
+    reviews = results[4] || [];
+  } catch {
+    // Graceful fallback to default state if database is still initializing
+  }
 
   const activities = [
     {

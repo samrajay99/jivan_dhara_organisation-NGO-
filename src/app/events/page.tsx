@@ -12,10 +12,15 @@ export const metadata: Metadata = {
 export const revalidate = 0;
 
 export default async function EventsPage() {
-  const events = await prisma.event.findMany({
-    where: { isPublished: true },
-    orderBy: { date: "asc" },
-  });
+  let events: any[] = [];
+  try {
+    events = await prisma.event.findMany({
+      where: { isPublished: true },
+      orderBy: { date: "asc" },
+    });
+  } catch {
+    events = [];
+  }
 
   return (
     <div className="bg-slate-50 min-h-screen">
